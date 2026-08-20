@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -o /dev/null -w \"HTML %{http_code}\\\\n\" http://localhost:8000/index.html)",
+      "Bash(curl -s -o /dev/null -w \"CSS  %{http_code}\\\\n\" http://localhost:8000/syte.css)",
+      "Bash(curl -s -o /dev/null -w \"JS   %{http_code}\\\\n\" http://localhost:8000/main.js)",
+      "Bash(curl -s http://localhost:8000/index.html)",
+      "Bash(curl -s http://localhost:8000/syte.css -o /tmp/served.css)",
+      "Read(//tmp/**)",
+      "Bash(node --check main.js)",
+      "Bash(python3 -)"
+    ]
+  }
+}

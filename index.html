@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Huasipungo - Juego Interactivo</title>
+  <link rel="stylesheet" href="syte.css" />
+</head>
+<body>
+  <!-- Botón para activar/desactivar modo noche -->
+<button class="toggle-noche" id="toggle-noche" title="Activar modo noche">
+  🌙
+</button>
+
+  <!-- ============ ENCABEZADO Y MENÚ ============ -->
+  <header class="encabezado">
+    <h1>❧ HUASIPUNGO ❧</h1>
+    <p class="subtitulo">Juego interactivo sobre la novela de Jorge Icaza</p>
+    <nav class="menu">
+      <button class="boton-nav activo" data-seccion="inicio">🏠 Inicio</button>
+      <button class="boton-nav" data-seccion="mentefacto">🌱 Mentefacto</button>
+      <button class="boton-nav" data-seccion="juego">🎮 Juego</button>
+      <button class="boton-nav" data-seccion="informacion">📚 Información</button>
+      <button class="boton-nav" data-seccion="creditos">🎓 Créditos</button>
+    </nav>
+  </header>
+
+  <main class="contenedor">
+
+    <!-- ============ INICIO ============ -->
+    <section id="inicio" class="seccion activa">
+      <!-- Silueta de montañas andinas -->
+<div class="montanas-svg">
+  <svg viewBox="0 0 1200 200" preserveAspectRatio="none">
+      <!-- Capa de montañas de fondo (más clara) -->
+      <path d="M0,200 L0,120 L150,40 L300,130 L450,20 L600,110 L750,50 L900,140 L1050,30 L1200,100 L1200,200 Z" fill="rgba(79,51,21,0.08)"/>
+      <!-- Capa de montañas de frente (más oscura) -->
+      <path d="M0,200 L0,150 L200,80 L400,160 L600,60 L800,150 L1000,70 L1200,140 L1200,200 Z" fill="rgba(138,90,43,0.15)"/>
+  </svg>
+</div>
+      <div class="tarjeta bienvenida">
+        <h2>¡Bienvenido al mundo de Huasipungo!</h2>
+        <p>Explora la novela de <strong>Jorge Icaza</strong> mediante un mentefacto clasal interactivo.</p>
+        <p>Después demuestra tus conocimientos en el desafío de preguntas.</p>
+        <p class="recorrido">🌱 Mentefacto → 🎮 Quiz → 📚 Información → 🎓 Créditos</p>
+        <button class="boton-primario" data-seccion="mentefacto">🌱 Explorar mentefacto</button>
+      </div>
+    </section>
+
+    <!-- ============ MENTEFACTO ============ -->
+    <section id="mentefacto" class="seccion">
+      <h2>🌱 Mentefacto de Huasipungo</h2>
+      <p class="instruccion">
+        Arrastra cada ficha del triángulo Clasal hasta el círculo que le corresponde,
+        o tócala para leer su contenido. Luego explora el resto del mentefacto
+        tocando cada nodo.
+      </p>
+
+      <div class="triangulos">
+        <!-- CLASAL (nocional) -->
+        <div class="triangulo-card">
+          <div class="triangulo-titulo">Clasal <span>(Sustantivos)</span></div>
+          <div class="triangulo-zona">
+            <div class="triangulo-forma clasal"></div>
+            <div class="slot" data-slot="clasal-x1" style="top:58%; left:50%;"><span>X1</span></div>
+            <div class="slot" data-slot="clasal-x2" style="top:82%; left:24%;"><span>X2</span></div>
+            <div class="slot" data-slot="clasal-x3" style="top:82%; left:76%;"><span>X3</span></div>
+            <div class="slot slot-fuera" data-slot="clasal-fuera" style="top:12%; left:90%;"><span>X4</span></div>
+          </div>
+          <div class="triangulo-base">NOVELA INDIGENISTA</div>
+          <p class="triangulo-frase">¿Cuáles son novelas indigenistas?</p>
+          <div class="banco-fichas" id="banco-clasal">
+            <div class="ficha" data-nodo="clasal-x1">Huasipungo</div>
+            <div class="ficha" data-nodo="clasal-x2">El mundo es ancho y ajeno</div>
+            <div class="ficha" data-nodo="clasal-x3">Otras novelas indigenistas</div>
+            <div class="ficha" data-nodo="clasal-fuera">Cien años de soledad</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="verificacion">
+        <button id="btn-verificar" class="boton-primario">✅ Verificar</button>
+        <p id="feedback-verificacion" class="triangulo-frase"></p>
+      </div>
+
+      <!-- Mentefacto conceptual (estructura tipo mapa: triángulo central + recuadros) -->
+      <div class="mentefacto">
+
+        <div class="fila-mf">
+          <div class="nodo nodo-tema" data-nodo="tema-central">
+            <span class="etiqueta">Tema central</span>
+            <p>La explotación, el abuso y la injusticia que sufren los indígenas
+            campesinos en la Sierra ecuatoriana durante el régimen hacendatario.</p>
+          </div>
+        </div>
+
+        <div class="conector vertical conector-subida"></div>
+
+        <div class="fila-mf fila-central-mf">
+          <div class="nodo nodo-personajes" data-nodo="personajes-principales">
+            <span class="etiqueta">Personajes principales</span>
+            <ul>
+              <li><strong>Andrés Chiliquinga</strong>: indígena trabajador y protagonista.</li>
+              <li><strong>Cunshi</strong>: esposa de Andrés, luchadora y sufrida.</li>
+              <li><strong>Don Alfonso Pereira</strong>: <span class="tooltip" tabindex="0">hacendado<span class="texto-tooltip">Dueño de la hacienda; ejercía control económico y social sobre los indígenas que vivían en sus tierras.</span></span> cruel y abusivo.</li>
+              <li><strong>La indígena</strong>: símbolo del pueblo indígena explotado.</li>
+            </ul>
+          </div>
+
+          <div class="conector horizontal"></div>
+
+          <div class="triangulo-mf">
+            <div class="triangulo-mf-forma"></div>
+            <div class="triangulo-mf-texto">
+              <strong>HUASIPUNGO</strong>
+              <span>Novela de<br>Jorge Icaza<br>(1934)</span>
+            </div>
+          </div>
+
+          <div class="conector horizontal"></div>
+
+          <div class="nodo nodo-idea" data-nodo="idea-principal">
+            <span class="etiqueta">Idea principal</span>
+            <p>Huasipungo denuncia la dura realidad del indígena ecuatoriano,
+            mostrando cómo el sistema hacendatario lo somete a la pobreza,
+            al abuso y a la falta de derechos.</p>
+          </div>
+        </div>
+
+        <div class="conector vertical conector-bajada"></div>
+
+        <div class="ramas-inferior">
+          <div class="rama"></div>
+          <div class="rama"></div>
+          <div class="rama"></div>
+        </div>
+
+        <div class="fila-mf fila-inferior-mf">
+          <div class="nodo nodo-ambiente" data-nodo="ambiente">
+            <span class="etiqueta">Ambiente</span>
+            <p>La historia se desarrolla en las haciendas de la Sierra ecuatoriana,
+            espacios de desigualdad, donde los indígenas viven en condiciones
+            de pobreza y humillación.</p>
+          </div>
+          <div class="nodo nodo-conflicto" data-nodo="conflicto-central">
+            <span class="etiqueta">Conflicto central</span>
+            <p>El indígena lucha por sobrevivir frente a la explotación de los
+            <span class="tooltip" tabindex="0">hacendados<span class="texto-tooltip">Dueños de la hacienda; ejercían control económico y social sobre los indígenas que vivían en sus tierras.</span></span>,
+            quienes abusan de su poder económico y social, negándoles justicia y dignidad.</p>
+          </div>
+          <div class="nodo nodo-mensaje" data-nodo="mensaje">
+            <span class="etiqueta">Mensaje</span>
+            <p>La novela invita a reflexionar sobre la justicia social, el respeto
+            a la dignidad humana y la necesidad de construir una sociedad más
+            equitativa y solidaria.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Galería de personajes (tarjetas con flip) -->
+      <div class="galeria-personajes">
+        <h3 class="subtitulo-seccion">👥 Galería de personajes</h3>
+        <p class="instruccion">Toca cada tarjeta para conocer al personaje.</p>
+        <div class="tarjetas-personajes">
+          <div class="tarjeta-flip" tabindex="0">
+            <div class="tarjeta-flip-interior">
+              <div class="tarjeta-flip-frente">
+                <span class="tarjeta-flip-icono">🧔🏿</span>
+                <span class="tarjeta-flip-nombre">Andrés Chiliquinga</span>
+              </div>
+              <div class="tarjeta-flip-reverso">
+                <p>Indígena trabajador y protagonista; representa el sufrimiento y la resistencia.</p>
+              </div>
+            </div>
+          </div>
+          <div class="tarjeta-flip" tabindex="0">
+            <div class="tarjeta-flip-interior">
+              <div class="tarjeta-flip-frente">
+                <span class="tarjeta-flip-icono">👩🏽</span>
+                <span class="tarjeta-flip-nombre">Cunshi</span>
+              </div>
+              <div class="tarjeta-flip-reverso">
+                <p>Esposa de Andrés, luchadora y sufrida.</p>
+              </div>
+            </div>
+          </div>
+          <div class="tarjeta-flip" tabindex="0">
+            <div class="tarjeta-flip-interior">
+              <div class="tarjeta-flip-frente">
+                <span class="tarjeta-flip-icono">🎩</span>
+                <span class="tarjeta-flip-nombre">Alfonso Pereira</span>
+              </div>
+              <div class="tarjeta-flip-reverso">
+                <p>Hacendado cruel y abusivo, dueño de la hacienda.</p>
+              </div>
+            </div>
+          </div>
+          <div class="tarjeta-flip" tabindex="0">
+            <div class="tarjeta-flip-interior">
+              <div class="tarjeta-flip-frente">
+                <span class="tarjeta-flip-icono">💼</span>
+                <span class="tarjeta-flip-nombre">Mr. Chapy</span>
+              </div>
+              <div class="tarjeta-flip-reverso">
+                <p>Inversionista estadounidense interesado en la hacienda.</p>
+              </div>
+            </div>
+          </div>
+          <div class="tarjeta-flip" tabindex="0">
+            <div class="tarjeta-flip-interior">
+              <div class="tarjeta-flip-frente">
+                <span class="tarjeta-flip-icono">🥾</span>
+                <span class="tarjeta-flip-nombre">Jacinto Quintana</span>
+              </div>
+              <div class="tarjeta-flip-reverso">
+                <p>Capataz que vigila y castiga a los indígenas.</p>
+              </div>
+            </div>
+          </div>
+          <div class="tarjeta-flip" tabindex="0">
+            <div class="tarjeta-flip-interior">
+              <div class="tarjeta-flip-frente">
+                <span class="tarjeta-flip-icono">⛪</span>
+                <span class="tarjeta-flip-nombre">Padre Juvencio Rojano</span>
+              </div>
+              <div class="tarjeta-flip-reverso">
+                <p>Sacerdote que justifica el orden establecido.</p>
+              </div>
+            </div>
+          </div>
+          <div class="tarjeta-flip" tabindex="0">
+            <div class="tarjeta-flip-interior">
+              <div class="tarjeta-flip-frente">
+                <span class="tarjeta-flip-icono">✊🏽</span>
+                <span class="tarjeta-flip-nombre">La indígena</span>
+              </div>
+              <div class="tarjeta-flip-reverso">
+                <p>Símbolo del pueblo indígena explotado en su conjunto.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="detalle-nodo" class="detalle-nodo oculto">
+        <h3 id="detalle-titulo"></h3>
+        <div id="detalle-contenido"></div>
+      </div>
+
+      <p id="indicacion-nodo" class="instruccion">
+        Toca cualquier ficha o nodo para ver su contenido.
+      </p>
+    </section>
+
+    <!-- ============ JUEGO ============ -->
+    <section id="juego" class="seccion">
+      <h2>🎮 Desafío de Huasipungo</h2>
+      <div class="marcador">⭐ Puntos: <span id="puntos">0</span></div>
+
+      <div class="tarjeta">
+
+        <div id="zona-intro">
+          <p>Ingresa tu nombre y presiona comenzar para jugar.</p>
+          <input type="text" id="input-nombre" class="campo-nombre" placeholder="Tu nombre" maxlength="20">
+          <p id="error-nombre" class="retroalimentacion mal oculto">Escribe tu nombre antes de comenzar.</p>
+          <button id="btn-comenzar" class="boton-primario">▶️ Comenzar juego</button>
+        </div>
+
+        <div id="zona-pregunta" class="oculto">
+          <!-- Cambia el párrafo de progreso por este nuevo div -->
+<div class="progreso-montana">
+  <div class="camino-relleno" id="camino-relleno"></div>
+  <div class="condor-icon" id="condor-icon">🦅</div>
+</div>
+<p id="progreso" class="progreso progreso-texto-antiguo"></p> <!-- Lo ocultamos con CSS pero lo dejamos por si el JS lo busca -->
+          <button id="btn-reiniciar-partida" class="boton-secundario boton-chico" title="Reiniciar esta partida">🔁 Reiniciar</button>
+          <h3 id="pregunta-texto"></h3>
+          <div id="opciones" class="opciones"></div>
+          <p id="retroalimentacion" class="retroalimentacion"></p>
+          <button id="btn-siguiente" class="boton-primario oculto">Siguiente ➜</button>
+        </div>
+
+        <div id="zona-final" class="oculto">
+          <h3>🏁 ¡Juego terminado!</h3>
+          <div id="insignia-resultado" class="insignia">
+            <span id="insignia-icono" class="insignia-icono"></span>
+            <span id="insignia-texto" class="insignia-texto"></span>
+          </div>
+          <p id="resultado-final"></p>
+          <button id="btn-reiniciar" class="boton-primario">🔄 Jugar de nuevo</button>
+          <button id="btn-cambiar-jugador" class="boton-primario boton-secundario">👤 Cambiar jugador</button>
+        </div>
+
+      </div>
+
+      <div class="tarjeta tabla-posiciones">
+        <h3>🏆 Tabla de posiciones</h3>
+        <button id="btn-reiniciar-ranking" class="boton-secundario boton-chico" title="Borrar la tabla de posiciones">🗑️ Reiniciar tabla</button>
+        <table id="tabla-ranking">
+          <thead>
+            <tr><th>#</th><th>Nombre</th><th>Puntos</th><th>Fecha</th></tr>
+          </thead>
+          <tbody id="cuerpo-ranking"></tbody>
+        </table>
+        <p id="sin-registros" class="instruccion oculto">Aún no hay partidas registradas. ¡Sé el primero!</p>
+      </div>
+    </section>
+
+    <!-- ============ INFORMACIÓN ============ -->
+    <section id="informacion" class="seccion">
+      <h2>📚 Sobre Huasipungo</h2>
+      <div class="tarjeta info">
+        <div class="dato">
+          <span class="clave">Autor</span>
+          <span class="valor">Jorge Icaza</span>
+        </div>
+        <div class="dato">
+          <span class="clave">Año de publicación</span>
+          <span class="valor">1934</span>
+        </div>
+        <div class="dato">
+          <span class="clave">Género</span>
+          <span class="valor">Novela de denuncia social (indigenista)</span>
+        </div>
+        <div class="dato bloque">
+          <span class="clave">Descripción</span>
+          <span class="valor">Huasipungo presenta la difícil situación de los indígenas
+          ecuatorianos sometidos a explotación y condiciones de vida injustas
+          dentro del sistema de hacienda.</span>
+        </div>
+        <div class="dato bloque">
+          <span class="clave">Temas principales</span>
+          <span class="valor">
+            • Explotación<br>
+            • Pobreza<br>
+            • Racismo<br>
+            • Desigualdad social<br>
+            • Resistencia indígena
+          </span>
+        </div>
+        <div class="dato bloque">
+          <span class="clave">Personaje principal</span>
+          <span class="valor"><strong>Andrés Chiliquinga</strong> representa el sufrimiento
+          y la resistencia de los indígenas.</span>
+        </div>
+        <div class="dato bloque">
+          <span class="clave">Sobre el autor</span>
+          <span class="valor">Jorge Icaza Coronel (Quito, 1906 – 1978) fue un escritor y
+          dramaturgo ecuatoriano, una de las figuras principales del indigenismo
+          latinoamericano. Su obra retrata la explotación del indígena serrano bajo el
+          sistema de haciendas, combinando la denuncia social con un lenguaje que
+          incorpora giros populares y quichuismos.</span>
+        </div>
+        <div class="dato bloque">
+          <span class="clave">Contexto histórico</span>
+          <span class="valor">Huasipungo se publicó en 1934, en un Ecuador rural dominado
+          por el latifundio y el
+          <span class="tooltip" tabindex="0">concertaje<span class="texto-tooltip">Sistema de deudas heredadas que ataba al indígena y su familia al servicio de la hacienda.</span></span>:
+          un sistema de deudas que ataba al indígena a la hacienda a cambio de un
+          <span class="tooltip" tabindex="0">huasipungo<span class="texto-tooltip">Pequeña parcela de tierra que el hacendado entregaba al indígena a cambio de trabajo gratuito.</span></span>.
+          La novela se inscribe en el indigenismo, corriente literaria de las décadas de
+          1930 y 1940 que denunciaba la marginación de los pueblos originarios en los
+          países andinos.</span>
+        </div>
+        <div class="dato bloque">
+          <span class="clave">Glosario</span>
+          <dl class="glosario">
+            <dt>Huasipungo</dt>
+            <dd>Pequeña parcela de tierra que el hacendado entregaba al indígena a cambio de trabajo gratuito.</dd>
+            <dt>Concertaje</dt>
+            <dd>Sistema de deudas heredadas que ataba al indígena y su familia al servicio de la hacienda.</dd>
+            <dt>Longo</dt>
+            <dd>Término despectivo usado en la novela para referirse al indígena.</dd>
+            <dt>Mayordomo / Capataz</dt>
+            <dd>Encargado de vigilar el trabajo de los indígenas y hacer cumplir las órdenes del hacendado.</dd>
+            <dt>Patrón / Hacendado</dt>
+            <dd>Dueño de la hacienda; ejercía control económico y social sobre los indígenas que vivían en sus tierras.</dd>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CRÉDITOS ============ -->
+    <section id="creditos" class="seccion">
+      <h2>🎓 Créditos</h2>
+      <div class="tarjeta info">
+        <div class="dato bloque">
+          <span class="clave">Autores</span>
+          <span class="valor">Moisés Dela, Andrés Loor, Miguel Jiménez, Roberto Asencio</span>
+        </div>
+        <div class="dato">
+          <span class="clave">Materia</span>
+          <span class="valor">Lengua y Literatura 3A</span>
+        </div>
+        <div class="dato">
+          <span class="clave">Docente</span>
+          <span class="valor">Karina Ormaza</span>
+        </div>
+        <div class="dato">
+          <span class="clave">Institución</span>
+          <span class="valor">San Benildo La Salle</span>
+        </div>
+        <div class="dato">
+          <span class="clave">Fecha</span>
+          <span class="valor">18 de agosto de 2026</span>
+        </div>
+        <div class="dato bloque">
+          <span class="clave">Objetivo del proyecto</span>
+          <span class="valor">Servir como material de apoyo para el estudio de la novela
+          <em>Huasipungo</em> de Jorge Icaza, mediante un mentefacto interactivo y un
+          desafío de preguntas, como complemento a un juego elaborado por separado en
+          RPG Maker MZ sobre la misma obra.</span>
+        </div>
+        <div class="dato bloque">
+          <span class="clave">Fuentes consultadas</span>
+          <span class="valor">
+            • Icaza, Jorge. <em>Huasipungo</em>. 1934.<br>
+            • Biografía de Jorge Icaza — enciclopedias y antologías de literatura ecuatoriana.<br>
+            • Apuntes de cátedra de Lengua y Literatura sobre la novela indigenista.
+          </span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="pie">Proyecto educativo sobre <em>Huasipungo</em></footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
