@@ -147,6 +147,8 @@ function fichaEnSlot(slot){
 function colocarEnSlot(ficha, slot){
   ficha.style.position  = "absolute";
   ficha.style.width     = "";
+  ficha.style.margin    = "";
+  ficha.style.height    = "";
   ficha.style.left      = slot.style.left;
   ficha.style.top       = slot.style.top;
   ficha.style.transform = "translate(-50%,-50%)";
@@ -160,6 +162,8 @@ function devolverAlBanco(ficha){
   const banco = document.getElementById(ficha.dataset.banco);
   ficha.style.position  = "";
   ficha.style.width     = "";
+  ficha.style.margin    = "";
+  ficha.style.height    = "";
   ficha.style.left      = "";
   ficha.style.top       = "";
   ficha.style.transform = "";
@@ -188,8 +192,12 @@ document.querySelectorAll(".ficha").forEach(ficha => {
   let arrastrando = false, movido = false;
 
   ficha.addEventListener("pointerdown", e => {
-    ficha.setPointerCapture(e.pointerId);
     const rect = ficha.getBoundingClientRect();
+    // Mientras se arrastra, la ficha cuelga del <body>: si un contenedor tiene
+    // backdrop-filter/transform, "position: fixed" se mediría desde él y no desde
+    // la ventana, y la ficha aparecería lejos del cursor.
+    document.body.appendChild(ficha);
+    ficha.setPointerCapture(e.pointerId);
     origenLeft  = rect.left;
     origenTop   = rect.top;
     inicioX     = e.clientX;
@@ -201,6 +209,8 @@ document.querySelectorAll(".ficha").forEach(ficha => {
     ficha.style.left      = origenLeft + "px";
     ficha.style.top       = origenTop + "px";
     ficha.style.width     = rect.width + "px";
+    ficha.style.height    = rect.height + "px";
+    ficha.style.margin    = "0";
     ficha.style.transform = "none";
     ficha.style.zIndex    = "1000";
   });
