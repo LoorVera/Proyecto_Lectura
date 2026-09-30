@@ -6,7 +6,12 @@ const secciones  = document.querySelectorAll(".seccion");
 
 function irA(nombre){
   secciones.forEach(s => s.classList.toggle("activa", s.id === nombre));
-  botonesNav.forEach(b => b.classList.toggle("activo", b.dataset.seccion === nombre));
+  botonesNav.forEach(b => {
+    const activo = b.dataset.seccion === nombre;
+    b.classList.toggle("activo", activo);
+    if (activo) b.setAttribute("aria-current", "page");
+    else b.removeAttribute("aria-current");
+  });
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -132,6 +137,7 @@ function mostrarDetalleNodo(id){
   detalleContenido.innerHTML = info.contenido;
   detalle.classList.remove("oculto");
   indicacion.classList.add("oculto");
+  detalle.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function fichaEnSlot(slot){
@@ -168,6 +174,15 @@ function devolverAlBanco(ficha){
 document.querySelectorAll(".ficha").forEach(ficha => {
   ficha.dataset.banco      = ficha.parentElement.id;
   ficha.dataset.slotActual = "";
+
+  ficha.tabIndex = 0;
+  ficha.setAttribute("role", "button");
+  ficha.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      mostrarDetalleNodo(ficha.dataset.nodo);
+    }
+  });
 
   let inicioX = 0, inicioY = 0, origenLeft = 0, origenTop = 0;
   let arrastrando = false, movido = false;
@@ -228,9 +243,21 @@ document.querySelectorAll(".ficha").forEach(ficha => {
       devolverAlBanco(ficha);
     }
   });
+
+  ficha.addEventListener("pointercancel", () => {
+    if (!arrastrando) return;
+    arrastrando = false;
+    ficha.classList.remove("arrastrando");
+    ficha.style.zIndex = "";
+    if (ficha.dataset.slotActual){
+      colocarEnSlot(ficha, document.querySelector(`.slot[data-slot="${ficha.dataset.slotActual}"]`));
+    } else {
+      devolverAlBanco(ficha);
+    }
+  });
 });
 
-document.getElementById("btn-verificar").addEventListener("click", () => {
+document.getElementById("btn-verificar").addEventListener("click", e => {
   const slots = document.querySelectorAll(".slot");
   let correctas = 0;
 
@@ -250,6 +277,11 @@ document.getElementById("btn-verificar").addEventListener("click", () => {
   feedbackVerificacion.textContent = correctas === total
     ? `🎉 ¡Perfecto! ${correctas} de ${total} correctas.`
     : `Tienes ${correctas} de ${total} correctas. Sigue intentando.`;
+
+  if (correctas === total){
+    const rect = e.currentTarget.getBoundingClientRect();
+    crearPolvoAndino(rect.left + rect.width / 2, rect.top + rect.height / 2);
+  }
 });
 
 /* mezclar el orden inicial de las fichas en cada banco */
@@ -261,10 +293,19 @@ document.querySelectorAll(".banco-fichas").forEach(banco => {
    MENTEFACTO CONCEPTUAL: nodos en cajas (clic para ver contenido)
    ============================================================ */
 document.querySelectorAll(".nodo[data-nodo]").forEach(nodo => {
-  nodo.addEventListener("click", () => {
+  const activar = () => {
     document.querySelectorAll(".nodo").forEach(n => n.classList.remove("activo"));
     nodo.classList.add("activo");
     mostrarDetalleNodo(nodo.dataset.nodo);
+  };
+  nodo.tabIndex = 0;
+  nodo.setAttribute("role", "button");
+  nodo.addEventListener("click", activar);
+  nodo.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      activar();
+    }
   });
 });
 
@@ -282,174 +323,8 @@ document.querySelectorAll(".tarjeta-flip").forEach(tarjeta => {
 });
 
 /* ============================================================
-   JUEGO DE PREGUNTAS
+   UTILIDADES
    ============================================================ */
-const preguntasBase = [
-  { texto:"¿Quién escribió Huasipungo?",
-    opciones:["Ciro Alegría","Jorge Icaza","José María Arguedas","Juan León Mera"],
-    correcta:"Jorge Icaza" },
-  { texto:"¿En qué año se publicó la novela?",
-    opciones:["1924","1934","1944","1954"],
-    correcta:"1934" },
-  { texto:"¿A qué corriente literaria pertenece la obra?",
-    opciones:["Modernismo","Romanticismo","Novela indigenista","Realismo mágico"],
-    correcta:"Novela indigenista" },
-  { texto:"¿Quién es el protagonista indígena de la novela?",
-    opciones:["Alfonso Pereira","Jacinto Quintana","Mr. Chapy","Andrés Chiliquinga"],
-    correcta:"Andrés Chiliquinga" },
-  { texto:"¿Qué representa Andrés Chiliquinga?",
-    opciones:["El poder del hacendado","El sufrimiento y la resistencia indígena","La riqueza urbana","La fe religiosa"],
-    correcta:"El sufrimiento y la resistencia indígena" },
-  { texto:"¿Qué es el «huasipungo»?",
-    opciones:["Una fiesta andina","Un arma de la época","La parcela asignada al indígena a cambio de trabajo","Un instrumento musical"],
-    correcta:"La parcela asignada al indígena a cambio de trabajo" },
-  { texto:"¿Quién es Alfonso Pereira en la historia?",
-    opciones:["El hacendado explotador","Un sacerdote","Un indígena rebelde","Un comerciante extranjero"],
-    correcta:"El hacendado explotador" },
-  { texto:"¿Cuál de los siguientes NO es un tema principal de la obra?",
-    opciones:["Explotación","Racismo","Aventuras espaciales","Pobreza"],
-    correcta:"Aventuras espaciales" },
-  { texto:"¿Qué personaje extranjero llega a la hacienda?",
-    opciones:["Mr. Chapy","Monsieur Dubois","Sir John","Don Quijote"],
-    correcta:"Mr. Chapy" },
-  { texto:"¿Cuál de estas obras NO pertenece a la novela indigenista?",
-    opciones:["El mundo es ancho y ajeno","Los ríos profundos","Las cruces sobre el agua","Cien años de soledad"],
-    correcta:"Cien años de soledad" },
-  { texto:"¿Quién es la esposa de Andrés Chiliquinga?",
-    opciones:["Cunshi","La indígena","Doña Blanca","Lolita"],
-    correcta:"Cunshi" },
-  { texto:"¿Qué es el «concertaje»?",
-    opciones:["Un baile tradicional andino","Un sistema de deudas que ataba al indígena a la hacienda","Un tipo de cultivo de la sierra","Una fiesta religiosa"],
-    correcta:"Un sistema de deudas que ataba al indígena a la hacienda" },
-  { texto:"¿Qué significa el término «longo» en la novela?",
-    opciones:["Un saludo de cortesía","Un término despectivo para referirse al indígena","Un tipo de vivienda","Un cargo dentro de la hacienda"],
-    correcta:"Un término despectivo para referirse al indígena" },
-  { texto:"¿Quién es Jacinto Quintana en la historia?",
-    opciones:["El protagonista","El capataz que vigila y castiga","El cura de la hacienda","Un inversionista extranjero"],
-    correcta:"El capataz que vigila y castiga" },
-  { texto:"¿Qué rol cumple el Padre Juvencio Rojano?",
-    opciones:["Defiende a los indígenas ante el hacendado","Justifica el orden establecido","Es el dueño de la hacienda","Es un trabajador indígena"],
-    correcta:"Justifica el orden establecido" },
-  { texto:"¿Qué representa \"La indígena\" como personaje simbólico?",
-    opciones:["Al pueblo indígena explotado en su conjunto","A la esposa de Alfonso Pereira","A una turista extranjera","A la Iglesia católica"],
-    correcta:"Al pueblo indígena explotado en su conjunto" },
-  { texto:"¿En qué región se desarrolla la historia de Huasipungo?",
-    opciones:["La Amazonía ecuatoriana","La Costa ecuatoriana","La Sierra ecuatoriana","Las Islas Galápagos"],
-    correcta:"La Sierra ecuatoriana" },
-  { texto:"¿Qué obra construyen los indígenas mediante trabajo forzado en la novela?",
-    opciones:["Una iglesia","Una carretera","Un puente colgante","Un canal de riego"],
-    correcta:"Una carretera" },
-  { texto:"¿Qué alianza se denuncia en el conflicto central de la novela?",
-    opciones:["Entre indígenas y hacendados","Entre hacendado, capataz e Iglesia","Entre el gobierno y los indígenas","Entre comerciantes extranjeros"],
-    correcta:"Entre hacendado, capataz e Iglesia" },
-  { texto:"¿Cuál de los siguientes NO es un tema principal de Huasipungo?",
-    opciones:["Racismo","Desigualdad social","Resistencia indígena","Amor romántico idealizado"],
-    correcta:"Amor romántico idealizado" },
-  { texto:"¿Qué mensaje final invita a reflexionar la novela?",
-    opciones:["La importancia de la venganza","La justicia social y la dignidad humana","El valor del dinero","La superioridad de una raza"],
-    correcta:"La justicia social y la dignidad humana" },
-  { texto:"¿Dónde y cuándo nació Jorge Icaza?",
-    opciones:["Quito, 1906","Guayaquil, 1910","Lima, 1906","Cuenca, 1920"],
-    correcta:"Quito, 1906" },
-  { texto:"¿En qué corriente literaria latinoamericana se inscribe Huasipungo?",
-    opciones:["El indigenismo","El modernismo","El realismo mágico","El costumbrismo"],
-    correcta:"El indigenismo" },
-  { texto:"¿Quién escribió \"El mundo es ancho y ajeno\", novela con temática similar a Huasipungo?",
-    opciones:["Ciro Alegría","José María Arguedas","Gabriel García Márquez","Joaquín Gallegos Lara"],
-    correcta:"Ciro Alegría" },
-  { texto:"¿Quién escribió \"Los ríos profundos\"?",
-    opciones:["José María Arguedas","Jorge Icaza","Ciro Alegría","Juan León Mera"],
-    correcta:"José María Arguedas" },
-  { texto:"¿Qué novela ecuatoriana, además de Huasipungo, pertenece a la corriente indigenista?",
-    opciones:["Las cruces sobre el agua","Cien años de soledad","Don Quijote de la Mancha","La vorágine"],
-    correcta:"Las cruces sobre el agua" },
-  { texto:"¿Qué significan \"Mayordomo\" o \"Capataz\" en el contexto de la novela?",
-    opciones:["El dueño de toda la tierra","El encargado de vigilar el trabajo y hacer cumplir las órdenes del hacendado","Un sacerdote itinerante","Un comerciante de la ciudad"],
-    correcta:"El encargado de vigilar el trabajo y hacer cumplir las órdenes del hacendado" },
-  { texto:"¿A qué se refiere el término \"Patrón\" o \"Hacendado\" en la novela?",
-    opciones:["Al indígena que trabaja la tierra","Al dueño de la hacienda con control económico y social","Al sacerdote de la parroquia","Al capataz de menor rango"],
-    correcta:"Al dueño de la hacienda con control económico y social" },
-  { texto:"¿Qué género literario tiene Huasipungo?",
-    opciones:["Novela de denuncia social (indigenista)","Novela policial","Novela de aventuras","Poesía épica"],
-    correcta:"Novela de denuncia social (indigenista)" },
-  { texto:"¿Qué recibía el indígena a cambio de su trabajo gratuito en la hacienda?",
-    opciones:["Un salario mensual","Una pequeña parcela llamada huasipungo","Educación gratuita","Un lote en la ciudad"],
-    correcta:"Una pequeña parcela llamada huasipungo" }
-];
-
-const PREGUNTAS_POR_PARTIDA = 5;
-
-let partida = [];
-let indice  = 0;
-let puntos  = 0;
-let nombreJugador = "";
-
-const zonaIntro     = document.getElementById("zona-intro");
-const zonaPregunta  = document.getElementById("zona-pregunta");
-const zonaFinal     = document.getElementById("zona-final");
-const puntosEl      = document.getElementById("puntos");
-const progresoEl    = document.getElementById("progreso");
-const preguntaEl    = document.getElementById("pregunta-texto");
-const opcionesEl    = document.getElementById("opciones");
-const feedbackEl    = document.getElementById("retroalimentacion");
-const btnSiguiente  = document.getElementById("btn-siguiente");
-const resultadoEl   = document.getElementById("resultado-final");
-const inputNombre   = document.getElementById("input-nombre");
-const errorNombreEl = document.getElementById("error-nombre");
-const cuerpoRanking = document.getElementById("cuerpo-ranking");
-const sinRegistrosEl= document.getElementById("sin-registros");
-const tablaRankingEl= document.getElementById("tabla-ranking");
-
-/* ============================================================
-   TABLA DE POSICIONES (localStorage)
-   ============================================================ */
-const CLAVE_RANKING  = "huasipungo-ranking";
-const CLAVE_JUGADOR  = "huasipungo-jugador";
-
-function obtenerRanking(){
-  try { return JSON.parse(localStorage.getItem(CLAVE_RANKING)) || []; }
-  catch { return []; }
-}
-
-function registrarResultado(nombre, puntosObtenidos){
-  const ranking = obtenerRanking();
-  ranking.push({ nombre, puntos: puntosObtenidos, fecha: new Date().toLocaleDateString() });
-  ranking.sort((a, b) => b.puntos - a.puntos);
-  localStorage.setItem(CLAVE_RANKING, JSON.stringify(ranking.slice(0, 10)));
-  renderizarRanking();
-}
-
-function escaparTexto(texto){
-  const span = document.createElement("span");
-  span.textContent = texto;
-  return span.innerHTML;
-}
-
-function renderizarRanking(){
-  const ranking = obtenerRanking();
-  const medallas = ["🥇", "🥈", "🥉"];
-  cuerpoRanking.innerHTML = ranking.map((r, i) =>
-    `<tr>
-      <td>${medallas[i] || (i + 1)}</td>
-      <td>${escaparTexto(r.nombre)}</td>
-      <td>${r.puntos}</td>
-      <td>${r.fecha}</td>
-    </tr>`
-  ).join("");
-  tablaRankingEl.classList.toggle("oculto", ranking.length === 0);
-  sinRegistrosEl.classList.toggle("oculto", ranking.length > 0);
-}
-
-inputNombre.value = localStorage.getItem(CLAVE_JUGADOR) || "";
-renderizarRanking();
-
-document.getElementById("btn-reiniciar-ranking").addEventListener("click", () => {
-  if (confirm("¿Borrar toda la tabla de posiciones? Esta acción no se puede deshacer.")){
-    localStorage.removeItem(CLAVE_RANKING);
-    renderizarRanking();
-  }
-});
-
 function barajar(lista){
   const a = [...lista];
   for (let i = a.length - 1; i > 0; i--){
@@ -458,144 +333,6 @@ function barajar(lista){
   }
   return a;
 }
-
-function prepararPartida(){
-  partida = barajar(preguntasBase)
-    .slice(0, PREGUNTAS_POR_PARTIDA)
-    .map(p => ({ ...p, opciones: barajar(p.opciones) }));
-  indice = 0;
-  puntos = 0;
-  puntosEl.textContent = "0";
-}
-
-function mostrarPregunta(){
-  const p = partida[indice];
-  const progresoTexto = document.getElementById("progreso");
-  const caminoRelleno = document.getElementById("camino-relleno");
-  const condorIcon = document.getElementById("condor-icon");
-
-  // Calculamos el porcentaje de avance
-  const porcentaje = (indice / partida.length) * 100;
-  
-  // Movemos el cóndor y rellenamos el camino
-  if(caminoRelleno) caminoRelleno.style.width = porcentaje + "%";
-  if(condorIcon) condorIcon.style.left = porcentaje + "%";
-  
-  // Mantenemos el texto por si acaso, pero estará oculto
-  if(progresoTexto) progresoTexto.textContent = `Pregunta ${indice + 1} de ${partida.length}`;
-
-  preguntaEl.textContent = p.texto;
-  feedbackEl.textContent = "";
-  feedbackEl.className   = "retroalimentacion";
-  btnSiguiente.classList.add("oculto");
-  opcionesEl.innerHTML   = "";
-
-  p.opciones.forEach(op => {
-      const btn = document.createElement("button");
-      btn.className   = "opcion";
-      btn.textContent = op;
-      // ¡OJO! Aquí pasamos el evento 'e' para el confeti del paso 2
-      btn.addEventListener("click", (e) => responder(btn, op, p.correcta, e)); 
-      opcionesEl.appendChild(btn);
-  });
-}
-function responder(boton, elegida, correcta, evento){
-  opcionesEl.querySelectorAll(".opcion").forEach(b => {
-      b.disabled = true;
-      if (b.textContent === correcta) b.classList.add("correcta");
-  });
-
-  if (elegida === correcta){
-      puntos += 10;
-      puntosEl.textContent = puntos;
-      feedbackEl.textContent = "✅ ¡Correcto! +10 puntos";
-      feedbackEl.classList.add("bien");
-      
-      // 🎉 ¡AQUÍ LANZAMOS EL POLVO DORADO!
-      if (evento) {
-          crearPolvoAndino(evento.clientX, evento.clientY);
-      }
-  } else {
-      boton.classList.add("incorrecta");
-      feedbackEl.textContent = `❌ Incorrecto. La respuesta era: ${correcta}`;
-      feedbackEl.classList.add("mal");
-  }
-  btnSiguiente.classList.remove("oculto");
-}
-
-btnSiguiente.addEventListener("click", () => {
-  indice++;
-  if (indice < partida.length) mostrarPregunta();
-  else finalizar();
-});
-
-const insigniaResultado = document.getElementById("insignia-resultado");
-const insigniaIcono     = document.getElementById("insignia-icono");
-const insigniaTexto     = document.getElementById("insignia-texto");
-
-function finalizar(){
-  zonaPregunta.classList.add("oculto");
-  zonaFinal.classList.remove("oculto");
-  const max = partida.length * 10;
-  let mensaje, clase, icono, etiqueta;
-  if (puntos >= max * 0.9){
-    mensaje = `🌟 ¡Excelente! Obtuviste ${puntos} de ${max}. Dominas Huasipungo.`;
-    clase = "oro"; icono = "🥇"; etiqueta = "Maestro de Huasipungo";
-  } else if (puntos >= max * 0.6){
-    mensaje = `👏 ¡Muy bien! Obtuviste ${puntos} de ${max}. Repasa el mentefacto para perfeccionar.`;
-    clase = "plata"; icono = "🥈"; etiqueta = "Buen conocedor";
-  } else if (puntos >= max * 0.4){
-    mensaje = `📖 Obtuviste ${puntos} de ${max}. Vuelve a leer la información y prueba otra vez.`;
-    clase = "bronce"; icono = "🥉"; etiqueta = "Vas por buen camino";
-  } else {
-    mensaje = `🌱 Obtuviste ${puntos} de ${max}. Explora el mentefacto y la sección de información para intentarlo de nuevo.`;
-    clase = "semilla"; icono = "🌱"; etiqueta = "Sigue explorando";
-  }
-  resultadoEl.textContent = mensaje;
-
-  insigniaResultado.className = `insignia ${clase}`;
-  insigniaIcono.textContent = icono;
-  insigniaTexto.textContent = etiqueta;
-
-  registrarResultado(nombreJugador, puntos);
-}
-
-document.getElementById("btn-comenzar").addEventListener("click", () => {
-  const nombre = inputNombre.value.trim();
-  if (!nombre){
-    errorNombreEl.classList.remove("oculto");
-    inputNombre.focus();
-    return;
-  }
-  errorNombreEl.classList.add("oculto");
-  nombreJugador = nombre;
-  localStorage.setItem(CLAVE_JUGADOR, nombre);
-
-  prepararPartida();
-  zonaIntro.classList.add("oculto");
-  zonaFinal.classList.add("oculto");
-  zonaPregunta.classList.remove("oculto");
-  mostrarPregunta();
-});
-
-document.getElementById("btn-reiniciar").addEventListener("click", () => {
-  prepararPartida();
-  zonaFinal.classList.add("oculto");
-  zonaPregunta.classList.remove("oculto");
-  mostrarPregunta();
-});
-
-document.getElementById("btn-cambiar-jugador").addEventListener("click", () => {
-  zonaFinal.classList.add("oculto");
-  zonaIntro.classList.remove("oculto");
-  inputNombre.value = "";
-  inputNombre.focus();
-});
-
-document.getElementById("btn-reiniciar-partida").addEventListener("click", () => {
-  prepararPartida();
-  mostrarPregunta();
-});
 
 /* ============================================================
 EFECTO VISUAL: POLVO DORADO AL ACERTAR
@@ -628,21 +365,23 @@ MODO NOCHE (HACIENDA DE NOCHE)
 const toggleNoche = document.getElementById("toggle-noche");
 const CLAVE_MODO_NOCHE = "huasipungo-modo-noche";
 
-// Cargar preferencia guardada
-if (localStorage.getItem(CLAVE_MODO_NOCHE) === "true") {
-    document.body.classList.add("modo-noche");
-    toggleNoche.textContent = "☀️";
-    toggleNoche.title = "Activar modo día";
+function aplicarModoNoche(esNoche){
+    document.body.classList.toggle("modo-noche", esNoche);
+    const etiqueta = esNoche ? "Activar modo día" : "Activar modo noche";
+    toggleNoche.textContent = esNoche ? "☀️" : "🌙";
+    toggleNoche.title = etiqueta;
+    toggleNoche.setAttribute("aria-label", etiqueta);
+    toggleNoche.setAttribute("aria-pressed", esNoche);
 }
 
+// Cargar preferencia guardada; si no hay, usar la del sistema
+const preferenciaGuardada = localStorage.getItem(CLAVE_MODO_NOCHE);
+aplicarModoNoche(preferenciaGuardada === null
+    ? window.matchMedia("(prefers-color-scheme: dark)").matches
+    : preferenciaGuardada === "true");
+
 toggleNoche.addEventListener("click", () => {
-    document.body.classList.toggle("modo-noche");
-    const esNoche = document.body.classList.contains("modo-noche");
-    
-    // Cambiar ícono del botón
-    toggleNoche.textContent = esNoche ? "☀️" : "🌙";
-    toggleNoche.title = esNoche ? "Activar modo día" : "Activar modo noche";
-    
-    // Guardar preferencia
+    const esNoche = !document.body.classList.contains("modo-noche");
+    aplicarModoNoche(esNoche);
     localStorage.setItem(CLAVE_MODO_NOCHE, esNoche);
 });

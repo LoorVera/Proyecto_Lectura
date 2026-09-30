@@ -7,8 +7,9 @@
   <link rel="stylesheet" href="Style.css" />
 </head>
 <body>
+  <div class="cielo-vivo" aria-hidden="true"><span class="estrella e1"></span><span class="estrella e2"></span><span class="estrella e3"></span><span class="estrella e4"></span><span class="estrella e5"></span><span class="estrella e6"></span><span class="estrella e7"></span><span class="estrella e8"></span><span class="estrella e9"></span><span class="estrella e10"></span><span class="estrella e11"></span><span class="estrella e12"></span><span class="estrella e13"></span><span class="estrella e14"></span><span class="estrella e15"></span><span class="estrella e16"></span><span class="estrella e17"></span><span class="estrella e18"></span><span class="estrella e19"></span><span class="estrella e20"></span><span class="estrella e21"></span><span class="estrella e22"></span><span class="estrella e23"></span><span class="estrella e24"></span><i class="fugaz f1"></i><i class="fugaz f2"></i><i class="fugaz f3"></i></div>
   <!-- Botón para activar/desactivar modo noche -->
-<button class="toggle-noche" id="toggle-noche" title="Activar modo noche">
+<button class="toggle-noche" id="toggle-noche" title="Activar modo noche" aria-label="Activar modo noche" aria-pressed="false">
   🌙
 </button>
 
@@ -19,7 +20,6 @@
     <nav class="menu">
       <button class="boton-nav activo" data-seccion="inicio">🏠 Inicio</button>
       <button class="boton-nav" data-seccion="mentefacto">🌱 Mentefacto</button>
-      <button class="boton-nav" data-seccion="juego">🎮 Juego</button>
       <button class="boton-nav" data-seccion="informacion">📚 Información</button>
       <button class="boton-nav" data-seccion="creditos">🎓 Créditos</button>
     </nav>
@@ -41,8 +41,7 @@
       <div class="tarjeta bienvenida">
         <h2>¡Bienvenido al mundo de Huasipungo!</h2>
         <p>Explora la novela de <strong>Jorge Icaza</strong> mediante un mentefacto clasal interactivo.</p>
-        <p>Después demuestra tus conocimientos en el desafío de preguntas.</p>
-        <p class="recorrido">🌱 Mentefacto → 🎮 Quiz → 📚 Información → 🎓 Créditos</p>
+        <p class="recorrido">🌱 Mentefacto → 📚 Información → 🎓 Créditos</p>
         <button class="boton-primario" data-seccion="mentefacto">🌱 Explorar mentefacto</button>
       </div>
     </section>
@@ -157,6 +156,14 @@
         </div>
       </div>
 
+      <div id="detalle-nodo" class="detalle-nodo oculto" aria-live="polite">
+        <h3 id="detalle-titulo"></h3>
+        <div id="detalle-contenido"></div>
+      </div>
+
+      <p id="indicacion-nodo" class="instruccion">
+        Toca cualquier ficha o nodo para ver su contenido.
+      </p>
       <!-- Galería de personajes (tarjetas con flip) -->
       <div class="galeria-personajes">
         <h3 class="subtitulo-seccion">👥 Galería de personajes</h3>
@@ -242,68 +249,6 @@
         </div>
       </div>
 
-      <div id="detalle-nodo" class="detalle-nodo oculto">
-        <h3 id="detalle-titulo"></h3>
-        <div id="detalle-contenido"></div>
-      </div>
-
-      <p id="indicacion-nodo" class="instruccion">
-        Toca cualquier ficha o nodo para ver su contenido.
-      </p>
-    </section>
-
-    <!-- ============ JUEGO ============ -->
-    <section id="juego" class="seccion">
-      <h2>🎮 Desafío de Huasipungo</h2>
-      <div class="marcador">⭐ Puntos: <span id="puntos">0</span></div>
-
-      <div class="tarjeta">
-
-        <div id="zona-intro">
-          <p>Ingresa tu nombre y presiona comenzar para jugar.</p>
-          <input type="text" id="input-nombre" class="campo-nombre" placeholder="Tu nombre" maxlength="20">
-          <p id="error-nombre" class="retroalimentacion mal oculto">Escribe tu nombre antes de comenzar.</p>
-          <button id="btn-comenzar" class="boton-primario">▶️ Comenzar juego</button>
-        </div>
-
-        <div id="zona-pregunta" class="oculto">
-          <!-- Cambia el párrafo de progreso por este nuevo div -->
-<div class="progreso-montana">
-  <div class="camino-relleno" id="camino-relleno"></div>
-  <div class="condor-icon" id="condor-icon">🦅</div>
-</div>
-<p id="progreso" class="progreso progreso-texto-antiguo"></p> <!-- Lo ocultamos con CSS pero lo dejamos por si el JS lo busca -->
-          <button id="btn-reiniciar-partida" class="boton-secundario boton-chico" title="Reiniciar esta partida">🔁 Reiniciar</button>
-          <h3 id="pregunta-texto"></h3>
-          <div id="opciones" class="opciones"></div>
-          <p id="retroalimentacion" class="retroalimentacion"></p>
-          <button id="btn-siguiente" class="boton-primario oculto">Siguiente ➜</button>
-        </div>
-
-        <div id="zona-final" class="oculto">
-          <h3>🏁 ¡Juego terminado!</h3>
-          <div id="insignia-resultado" class="insignia">
-            <span id="insignia-icono" class="insignia-icono"></span>
-            <span id="insignia-texto" class="insignia-texto"></span>
-          </div>
-          <p id="resultado-final"></p>
-          <button id="btn-reiniciar" class="boton-primario">🔄 Jugar de nuevo</button>
-          <button id="btn-cambiar-jugador" class="boton-primario boton-secundario">👤 Cambiar jugador</button>
-        </div>
-
-      </div>
-
-      <div class="tarjeta tabla-posiciones">
-        <h3>🏆 Tabla de posiciones</h3>
-        <button id="btn-reiniciar-ranking" class="boton-secundario boton-chico" title="Borrar la tabla de posiciones">🗑️ Reiniciar tabla</button>
-        <table id="tabla-ranking">
-          <thead>
-            <tr><th>#</th><th>Nombre</th><th>Puntos</th><th>Fecha</th></tr>
-          </thead>
-          <tbody id="cuerpo-ranking"></tbody>
-        </table>
-        <p id="sin-registros" class="instruccion oculto">Aún no hay partidas registradas. ¡Sé el primero!</p>
-      </div>
     </section>
 
     <!-- ============ INFORMACIÓN ============ -->
@@ -407,8 +352,8 @@
         <div class="dato bloque">
           <span class="clave">Objetivo del proyecto</span>
           <span class="valor">Servir como material de apoyo para el estudio de la novela
-          <em>Huasipungo</em> de Jorge Icaza, mediante un mentefacto interactivo y un
-          desafío de preguntas, como complemento a un juego elaborado por separado en
+          <em>Huasipungo</em> de Jorge Icaza, mediante un mentefacto interactivo y una
+          galería de personajes, como complemento a un juego elaborado por separado en
           RPG Maker MZ sobre la misma obra.</span>
         </div>
         <div class="dato bloque">
@@ -426,6 +371,6 @@
 
   <footer class="pie">Proyecto educativo sobre <em>Huasipungo</em></footer>
 
-  <script src="Main.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
